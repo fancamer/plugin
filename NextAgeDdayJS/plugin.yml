@@ -1,5 +1,5 @@
 name: NextAgeDdayJS
-description: "배우의 다음 나이까지 D-Day를 계산하여 Custom Field에 저장하는 JS 플러그인"
+description: "배우의 다음 나이까지 D-Day를 Custom Field에 자동 저장"
 version: 1.0.0
 
 interface: raw
