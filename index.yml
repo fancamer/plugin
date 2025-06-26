@@ -1,5 +1,4 @@
-plugins:
-  - name: NextAgeDdayJS
-    description: "Auto calculate days until next age for each performer (D-Day)"
-    version: "1.0.0"
-    url: "https://raw.githubusercontent.com/fancamer/NextAgeDdayJS/main/plugin.yml"
+- name: NextAgeDdayJS
+  description: "Auto calculate days until next age for each performer (D-Day)"
+  version: "1.0.0"
+  url: "https://raw.githubusercontent.com/fancamer/NextAgeDdayJS/main/plugin.yml"
