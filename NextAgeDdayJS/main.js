@@ -1,7 +1,12 @@
 const fetch = require("node-fetch");
 
-const STASH_URL = "http://localhost:9999/graphql";
-const API_KEY = ;
+const STASH_URL = process.env.STASH_URL || "http://localhost:9999/graphql";
+const API_KEY = process.env.API_KEY;
+
+if (!API_KEY) {
+  console.error("Error: API_KEY 환경변수가 설정되어 있지 않습니다.");
+  process.exit(1);
+}
 
 async function runGraphQL(query, variables = {}) {
   const response = await fetch(STASH_URL, {
@@ -125,11 +130,11 @@ async function updateCustomField(performerId, value) {
 }
 
 async function main() {
-  // 1. Custom Field 생성 확인 및 자동 생성
+  // 1. Custom Field 생성 확인 및 생성
   const customFieldName = "NextAgeDday";
   await ensureCustomFieldExists(customFieldName);
 
-  // 2. 배우 정보 가져와서 D-Day 계산 후 업데이트
+  // 2. 배우 정보 가져와서 업데이트
   const performers = await getAllPerformers();
   for (const performer of performers) {
     const ddayText = calculateDdayAndNextAge(performer.birthdate);
@@ -138,7 +143,6 @@ async function main() {
       await updateCustomField(performer.id, ddayText);
     }
   }
-
   console.log("업데이트 완료!");
 }
 
