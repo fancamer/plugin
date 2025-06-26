@@ -1,20 +1,14 @@
 const fetch = require("node-fetch");
 
 const STASH_URL = process.env.STASH_URL || "http://localhost:9999/graphql";
-const API_KEY = process.env.API_KEY;
 
-if (!API_KEY) {
-  console.error("Error: API_KEY 환경변수가 설정되어 있지 않습니다.");
-  process.exit(1);
-}
-
+// API 키 없이 요청 헤더에 ApiKey 넣지 않음
 async function runGraphQL(query, variables = {}) {
   const response = await fetch(STASH_URL, {
     method: "POST",
     headers: {
       "Accept-Encoding": "gzip, deflate",
-      "Content-Type": "application/json",
-      "ApiKey": API_KEY,
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({ query, variables }),
   });
@@ -130,11 +124,9 @@ async function updateCustomField(performerId, value) {
 }
 
 async function main() {
-  // 1. Custom Field 생성 확인 및 생성
   const customFieldName = "NextAgeDday";
   await ensureCustomFieldExists(customFieldName);
 
-  // 2. 배우 정보 가져와서 업데이트
   const performers = await getAllPerformers();
   for (const performer of performers) {
     const ddayText = calculateDdayAndNextAge(performer.birthdate);
@@ -143,10 +135,11 @@ async function main() {
       await updateCustomField(performer.id, ddayText);
     }
   }
+
   console.log("업데이트 완료!");
 }
 
 main().catch(err => {
-  console.error("NextAgeDdayJS 플러그인 실행 중 오류:", err);
+  console.error("NextAgeDdayJS (No API Key) 실행 중 오류:", err);
   process.exit(1);
 });
