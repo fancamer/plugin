@@ -1,0 +1,5 @@
+plugins:
+  - name: NextAgeDdayJS
+    description: "배우의 다음 나이까지 D-Day 자동 계산 플러그인"
+    version: "1.0.0"
+    url: "https://raw.githubusercontent.com/fancamer/NextAgeDdayJS/main/plugin.yml"
