@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
-const STASH_URL = process.env.STASH_URL || "http://localhost:9999/graphql";
-const API_KEY = process.env.API_KEY || "your_api_key_here";
+const STASH_URL = "http://localhost:9999/graphql";
+const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJmYW5jYW0iLCJzdWIiOiJBUElLZXkiLCJpYXQiOjE3NTA5MDU0Nzh9.eK5pnMTHxC1L953PDqWaOMWUR-JwYJSPtAGTVh0sa9k";
 
 async function runGraphQL(query, variables = {}) {
   const response = await fetch(STASH_URL, {
@@ -13,7 +13,11 @@ async function runGraphQL(query, variables = {}) {
     },
     body: JSON.stringify({ query, variables }),
   });
-  return response.json();
+  const json = await response.json();
+  if (json.errors) {
+    console.error("GraphQL errors:", json.errors);
+  }
+  return json;
 }
 
 async function getAllPerformers() {
@@ -28,6 +32,52 @@ async function getAllPerformers() {
   `;
   const result = await runGraphQL(query);
   return result.data.allPerformers;
+}
+
+async function getCustomFields() {
+  const query = `
+    query {
+      allCustomFields {
+        id
+        name
+        type
+      }
+    }
+  `;
+  const result = await runGraphQL(query);
+  return result.data.allCustomFields;
+}
+
+async function createCustomField(name) {
+  const mutation = `
+    mutation customFieldCreate($input: CustomFieldCreateInput!) {
+      customFieldCreate(input: $input) {
+        id
+        name
+      }
+    }
+  `;
+  const variables = {
+    input: {
+      name: name,
+      type: "STRING",
+      entity: "PERFORMER"
+    }
+  };
+  const result = await runGraphQL(mutation, variables);
+  return result.data.customFieldCreate;
+}
+
+async function ensureCustomFieldExists(name) {
+  const fields = await getCustomFields();
+  const field = fields.find(f => f.name === name);
+  if (field) {
+    console.log(`Custom field '${name}' already exists.`);
+    return field;
+  } else {
+    console.log(`Creating custom field '${name}'...`);
+    return await createCustomField(name);
+  }
 }
 
 function calculateDdayAndNextAge(birthdate) {
@@ -56,7 +106,7 @@ function calculateDdayAndNextAge(birthdate) {
 }
 
 async function updateCustomField(performerId, value) {
-  const query = `
+  const mutation = `
     mutation performerUpdate($input: PerformerUpdateInput!) {
       performerUpdate(input: $input) {
         id
@@ -71,10 +121,15 @@ async function updateCustomField(performerId, value) {
       },
     },
   };
-  await runGraphQL(query, variables);
+  await runGraphQL(mutation, variables);
 }
 
 async function main() {
+  // 1. Custom Field 생성 확인 및 자동 생성
+  const customFieldName = "NextAgeDday";
+  await ensureCustomFieldExists(customFieldName);
+
+  // 2. 배우 정보 가져와서 D-Day 계산 후 업데이트
   const performers = await getAllPerformers();
   for (const performer of performers) {
     const ddayText = calculateDdayAndNextAge(performer.birthdate);
@@ -83,9 +138,11 @@ async function main() {
       await updateCustomField(performer.id, ddayText);
     }
   }
+
+  console.log("업데이트 완료!");
 }
 
-main().catch((err) => {
-  console.error("Error in NextAgeDdayJS plugin:", err);
+main().catch(err => {
+  console.error("NextAgeDdayJS 플러그인 실행 중 오류:", err);
   process.exit(1);
 });
