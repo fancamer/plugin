@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
 const STASH_URL = "http://localhost:9999/graphql";
-const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJmYW5jYW0iLCJzdWIiOiJBUElLZXkiLCJpYXQiOjE3NTA5MDU0Nzh9.eK5pnMTHxC1L953PDqWaOMWUR-JwYJSPtAGTVh0sa9k";
+const API_KEY = ;
 
 async function runGraphQL(query, variables = {}) {
   const response = await fetch(STASH_URL, {
